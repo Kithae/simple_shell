@@ -1,6 +1,6 @@
 #include "shell.h"
 /**
- * main - a function to initialize the program variables
+ * main - A function to initialize the program variables
  * @ac: number of arguments received
  * @av: the argument values
  * @env: environmental values received
@@ -42,7 +42,7 @@ void ctrl_c(int opr UNUSED)
 
 /**
  * run_prog - a function to run the proposed program structures
- * with the information provided
+* with the information provided
  * @data: a structure pointer
  * @av: the argument values
  * @env: environmental values received
@@ -56,7 +56,7 @@ void run_prog(input *data, int ac, char *av[], char **env)
 
 	data->program_name = av[0];
 	data->input_line = NULL;
-	data->command_name = NULL;
+	data->cmd_name = NULL;
 	data->exec_counter = 0;
 
 	if (ac == 1)
@@ -66,10 +66,10 @@ void run_prog(input *data, int ac, char *av[], char **env)
 		data->file_descriptor = open(av[1], O_RDONLY);
 		if (data->file_descriptor == -1)
 		{
-			_printe(data->program_name);
-			_printe(": 0: Can't open ");
-			_printe(av[1]);
-			_printe("\n");
+			_printerr(data->program_name);
+			_printerr(": 0: Can't open ");
+			_printerr(av[1]);
+			_printerr("\n");
 			exit(127);
 		}
 	}
@@ -92,7 +92,7 @@ void run_prog(input *data, int ac, char *av[], char **env)
 	}
 }
 /**
- * process_input - a function with a loop to execute the above prompt
+ * process_input - a function with a loop to execute the above prompt.
  * @query: the printable prompt
  * @data: a structure pointer
  */
@@ -107,21 +107,21 @@ void process_input(char *query, input *data)
 
 		if (status == EOF)
 		{
-			free_all_data(data);
+			free_full_data(data);
 			exit(errno);
 		}
 		if (length >= 1)
 		{
 			aug_alias(data);
 			aug_variables(data);
-			tokenize(data);
+			parse(data);
 			if (data->tokens[0])
 			{
-				status = execute(data);
+				status = cmd_execute(data);
 				if (status != 0)
 					error_print(status, data);
 			}
-			free_recurrent_data(data);
+			free_recur_data(data);
 		}
 	}
 }

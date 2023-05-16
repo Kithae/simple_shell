@@ -80,10 +80,10 @@ char **tok_path(input *data)
 	tokens = malloc(sizeof(char *) * folder_tally);
 
 	a = 0;
-	tokens[a] = copy_str(_strtok(PATH, ":"));
+	tokens[a] = copy_str(_stringtok(PATH, ":"));
 	while (tokens[a++])
 	{
-		tokens[a] = copy_str(_strtok(NULL, ":"));
+		tokens[a] = copy_str(_stringtok(NULL, ":"));
 	}
 
 	free(PATH);
