@@ -87,7 +87,7 @@ int remove_key(char *key, input *data)
 		if (string_compare(key, data->env[a], length_of_key) &&
 		 data->env[a][length_of_key] == '=')
 		{
-			free(data->env[i]);
+			free(data->env[a]);
 
 			a++;
 			for (; data->env[a]; a++)

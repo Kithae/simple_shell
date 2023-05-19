@@ -11,7 +11,7 @@ int _readline(input *data)
 	char bf[BUFFER_SIZE] = {'\0'};
 	static char *array_cmd[10] = {NULL};
 	static char array_op[10] = {'\0'};
-	stringsize_t read_byte, a = 0;
+	ssize_t read_byte, a = 0;
 
 	if (!array_cmd[0] || (array_op[0] == '&' && errno != 0) ||
 		(array_op[0] == '|' && errno == 0))
@@ -22,13 +22,13 @@ int _readline(input *data)
 			array_cmd[a] = NULL;
 		}
 
-		read_byte = read(data->file_descriptor, &buff, BUFFER_SIZE - 1);
+		read_byte = read(data->file_descriptor, &bf, BUFFER_SIZE - 1);
 		if (read_byte == 0)
 			return (-1);
 
 		a = 0;
 		do {
-			array_cmd[a] = copy_str(_stringtok(a ? NULL : buff, "\n;"));
+			array_cmd[a] = copy_str(_stringtok(a ? NULL : bf, "\n;"));
 			a = logic_opers(array_cmd, a, array_op);
 		} while (array_cmd[a++]);
 	}

@@ -41,7 +41,7 @@ int cd_builtin(input *data)
 		{
 			dir_old = list_key("OLDPWD", data);
 			if (dir_old)
-				status = chdir(data, dir_old);
+				status = change_dir(data, dir_old);
 			_print(list_key("PWD", data));
 			_print("\n");
 
@@ -49,7 +49,7 @@ int cd_builtin(input *data)
 		}
 		else
 		{
-			return (chdir(data, data->tokens[1]));
+			return (change_dir(data, data->tokens[1]));
 		}
 	}
 	else
@@ -57,18 +57,18 @@ int cd_builtin(input *data)
 		if (!dir_home)
 			dir_home = getcwd(old_dir, 128);
 
-		return (chdir(data, dir_home));
+		return (change_dir(data, dir_home));
 	}
 	return (0);
 }
 
 /**
- * chdir - A function for setting a working directory
+ * change_dir - A function for setting a working directory
  * @data: a structure pointer
  * @new_dir: a path
  * Return: 0 else, a number
  */
-int chdir(input *data, char *new_dir)
+int change_dir(input *data, char *new_dir)
 {
 	char old_dir[128] = {0};
 	int err_code = 0;
@@ -120,7 +120,7 @@ int help_builtin(input *data)
 
 	for (a = 0; msg[a]; a++)
 	{
-		len = string_len(data->tokens[1]);
+		len = string_length(data->tokens[1]);
 		if (string_compare(data->tokens[1], msg[a], len))
 		{
 			_print(msg[a] + len + 1);

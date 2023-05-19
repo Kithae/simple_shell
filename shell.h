@@ -64,7 +64,7 @@ char **tok_path(input *data);
 char *_stringtok(char *line, char *delim);
 int list_builtins(input *data);
 int exit_builtin(input *data);
-int chdir(input *data, char *new_dir);
+int change_dir(input *data, char *new_dir);
 void free_pt_array(char **folder);
 void free_recur_data(input *data);
 void free_full_data(input *data);
