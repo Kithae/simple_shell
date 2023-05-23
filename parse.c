@@ -1,69 +1,39 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include "shell.h"
-
 /**
- * parseInput - seperate input into tokens
- * @input: pointer to string for parsing
- *
- * Return: NULL
+ * parse - A function that uses a specified delimiter to separate the string
+ * @data: a structure pointer
+ * Return: the string array
  */
-
-char* read_line()
+void parse(input *data)
 {
-	char *input = NULL;
-	size_t buf = 0;
+	char *dlimit = " \t";
+	int a, b, tally = 2, length;
 
-	if(getline(&input, &buf, stdin) == -1)
+	length = string_length(data->input_line);
+	if (length)
 	{
-		return NULL;
+		if (data->input_line[length - 1] == '\n')
+			data->input_line[length - 1] = '\0';
 	}
-return input;
-}
-
-/**
- *
- *
- *
- *
- *
- *
- */
-
-char parseInput(char *input)
-{
-	char *input_copy = NULL;
-	const char *delimiter = (" " "\n" "\t");
-	char *token;
-	int i;
-	int num_token = 0;
-	char **argv;
-	
-	input = read_line();
-	input_copy = malloc(sizeof(char) * (size_t)input);
-	if (input_copy == NULL)
+	for (a = 0; data->input_line[a]; a++)
 	{
-		perror("memory allocation error");
-		return (-1);
+		for (b = 0; dlimit[b]; b++)
+		{
+			if (data->input_line[a] == dlimit[b])
+				tally++;
+		}
 	}
-	input_copy = copy_str(input);
-	token = strtok(input_copy, delimiter);
-	while (token != NULL)
+	data->tokens = malloc(tally * sizeof(char *));
+	if (data->tokens == NULL)
 	{
-		num_token++;
-		token = strtok(NULL, delimiter);
+		perror(data->program_name);
+		exit(errno);
 	}
-	num_token++;
-	argv = malloc(sizeof(char *) * num_token);
-	token = strtok(input_copy, delimiter);
-	for (i = 0; token != NULL; i++)
+	a = 0;
+	data->tokens[a] = copy_str(_stringtok(data->input_line, dlimit));
+	data->cmd_name = copy_str(data->tokens[0]);
+	while (data->tokens[a++])
 	{
-		argv[i] = malloc(sizeof(char) * string_length(token));
-		argv[i] = copy_str(token);
-		token = strtok(NULL, delimiter);
+		data->tokens[a] = copy_str(_stringtok(NULL, dlimit));
 	}
-	argv[i] = NULL;
-
-	return (*argv[i]);
 }

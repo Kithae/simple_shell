@@ -37,17 +37,17 @@ char *findTokenEnd(char *str, const char *delimiter)
 
 /**
  * _stringtok - tokenize string
- * @str: pointer to string
- * @delimiter: pointer to strings for skip
+ * @line: pointer to string
+ * @delim: pointer to strings for skip
  *
  * Return: tokens
  */
 
 char *_stringtok(char *line, char *delim)
 {
-	static char *tokenStart = NULL;
-	static char *next_Token = NULL;
-	static char *tokenEnd;
+	char *tokenStart = NULL;
+	char *next_Token = NULL;
+	char *tokenEnd;
 
 	if (line != NULL)
 	{
