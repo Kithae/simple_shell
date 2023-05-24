@@ -93,9 +93,9 @@ int tally_characters(char *string, char *character);
 char *read_alias(input *data, char *alias);
 int op_alias(char *alias_string, input *data);
 
-void _strcpy(char* str1, const char* str2);
+void _strcpy(char *str1, const char *str2);
 void execute_Cmd(char *argv[], char *envp[]);
 void envi_var(const char *token);
-char* read_line();
+char *read_line(void);
 char parseInput(char *input);
 #endif

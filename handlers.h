@@ -2,7 +2,7 @@
 #define HANDLERS_H
 
 #define UNUSED __attribute__((unused))
-#define PROMPT_MSG "dali<3 " 
+#define PROMPT_MSG "dali<3 "
 #define BUFFER_SIZE 1024
 
 #define HELP_MSG "help=\n"\
