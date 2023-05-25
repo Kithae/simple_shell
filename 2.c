@@ -1,117 +1,185 @@
 #include "main.h"
 
-/**
- * cd - change directory.
- * @args: parameter of type para
- * Return: 0, 1
- */
-int cd(para *args)
-{
-	char *dest, *line = args->line;
+static char **words;
+static int wordCount;
 
-	if (!_strcmp(line, "cd"))
+
+/**
+ * exe_cmd -  function that execute command
+ * @args: array of arguments for the command
+ * Return: 0 on sucess, -1 on failure
+*/
+int exe_cmd(char **args)
+{
+	int rtVal = 0;
+
+	if (_strcmp(args[0], "unsetenv") == 0)
 	{
-		if (args->n_token == 1)
-			dest = _get_env(args->envp, "HOME", 4);
-		else
-		{
-			line += 3;
-			if (!_strcmp(line, "-"))
-			{
-				dest = args->old_pwd;
-				write(1, dest, _strlen(dest));
-				write(1, "\n", 1);
-			}
-			else
-				dest = line;
-		}
-		if (chdir(dest) == -1)
-		{
-		_printf("%s: %i: cd: an't cd to %s\n", args->shell_name, args->count, dest);
-		args->status = 2;
-		}
-		else
-		{
-			free(args->old_pwd);
-			args->old_pwd = _strdup(args, &((*(args->pwd))[4]));
-			if (!args->old_pwd)
-				free_exit(args);
-			change_pwd(args);
-			args->status = 0;
-		}
-		return (1);
+		_unsetenv(args[1]);
 	}
-	return (0);
+	else if (_strcmp(args[0], "cd") == 0)
+	{
+		chgdir(args[1]);
+	}
+	else if (_strcmp(args[0], "exit") == 0)
+	{
+		exit_status(args[1]);
+	}
+	else if (_strcmp(args[0], "setenv") == 0)
+	{
+		_setenv(args[1], args[2]);
+	} else
+	{
+		args[0] = get_path(args[0]);
+		rtVal = exe_bin(args);
+	}
+	return (rtVal);
 }
 
 /**
- * change_pwd - change the pwd
- * @args: parameter of type para.
- */
-void change_pwd(para *args)
+ * exit_status - Exit function with exit status
+ * @input: exit status code/number
+*/
+void exit_status(const char *input)
 {
-	char buffer[250];
-	char *pwd = _malloc(args, 256);
+	if (input != NULL)
+	{
+		int status = _atoi(input);
 
-	getcwd(buffer, 250);
-	pwd[0] = '\0';
-	_strcat(pwd, "PWD=");
-	_strcat(pwd, buffer);
-	free(*(args->pwd));
-	*(args->pwd) = pwd;
+		if (words != NULL)
+			freeWords(words, wordCount);
+		exit(status);
+	} else
+	{
+		if (words != NULL)
+			freeWords(words, wordCount);
+		exit(EXIT_SUCCESS);
+	}
 }
 
 /**
- * get_PWD - get the pwd from the env
- * @args: parameter of type para.
- * Return: pointer to the pwd
- */
-char **get_PWD(para *args)
+ * prompt -  function that prompts the user for input
+ * Return: 0 on success and -1 on failure
+*/
+int prompt(void)
+{
+	char *line = NULL;
+	size_t line_size;
+	ssize_t status_var;
+	char *delim = " \n";
+	int rtVal = -1, i = 0;
+
+	if (isatty(STDIN_FILENO))
+	{
+		output("($) ");
+		/* printf("Input is from terminal.\n"); */
+	}
+	status_var = getline(&line, &line_size, stdin);
+	while (line[i] != '\n')
+		i++;
+
+	line[i] = '\0';
+	/* Test that input was successful and exit if not */
+	if (status_var > 0)
+	{
+		/* invoke the word separator function and get number of words read */
+		wordCount = seperate_word(line, &words, i, delim);
+		free(line);
+		line = NULL;
+	}
+	rtVal = exe_cmd(words);
+	if (words != NULL)
+		freeWords(words, wordCount);
+	return (rtVal);
+}
+
+/**
+ * seperate_word - Function that seperates the words
+ * in a string into a NULL terminated array of words
+ * @line: The line of string to be operated
+ * @words: Array to store the words
+ * @line_size: size of the line string
+ * @delim: Delimiter to be used for tokenization
+ * Return: On success number of words tokenized, -1 on failure
+*/
+int seperate_word(char *line,
+char ***words, int line_size, char *delim)
 {
 	int i;
-	char *pwd = NULL;
+	int wordCount = -1;
+	char *token = NULL;
 
-	for (i = 0; args->envp[i] != NULL; i++)
+
+	if (line != NULL && _strcmp(line, "") != 0 && _strcmp(line, " ") != 0)
 	{
-		if (_strncmp(args->envp[i], "PWD", 3) == 0)
+		wordCount = 1;
+		for (i = 0; i < line_size; i++)
 		{
-			pwd = _strdup(args, args->envp[i]);
-			args->envp[i] = pwd;
-			return (&(args->envp[i]));
+			if (line[i] == *delim)
+			{
+				if (line[i + 1] == '#')
+					break;
+				wordCount++;
+			}
+		}
+
+		*words = (char **)malloc(sizeof(char *) * (wordCount + 1));
+		if (*words != NULL)
+		{
+			token = _strtok(line, delim);
+
+			i = 0;
+			while (token != NULL)
+			{
+				(*words)[i] = _strdup(token);
+				token = _strtok(NULL, delim);
+				if (token != NULL)
+				{
+					if (token[0] == '#')
+						token = NULL;
+				}
+				i++;
+			}
+			(*words)[i] = NULL;
 		}
 	}
-	return (NULL);
+	return (wordCount);
 }
 
 /**
- * free_exit - free arguments before exit
- * @args: parameter of type para
+ * _unsetenv - Function that unsets an enviroment variable
+ * @name: name of enviroment variable
+ * Return: 0 on success, -1 on failure
  */
-void free_exit(para *args)
+int _unsetenv(const char *name)
 {
-	if (args->line)
-		free(args->line);
-	if (args->path)
-		free(args->path);
-	if (args->pwd)
-		free(*(args->pwd));
-	if (args->old_pwd)
-		free(args->old_pwd);
-	exit(255);
+	char *env, *token;
+	int count = 0, test = -1;
+
+	while (environ[count])
+	{
+		env = _strdup(environ[count]);
+
+		token = _strtok(env, "=");
+		if (_strcmp(token, name) == 0)
+		{
+			free_node(name);
+			printf("got here\n");
+			while (environ[count] != NULL)
+			{
+				environ[count] = environ[count + 1];
+				count++;
+			}
+			environ[count] = NULL;
+			free(env);
+			test = 0;
+			break;
+		}
+		count++;
+		free(env);
+		test = -1;
+	}
+	if (test == -1)
+		write(STDERR_FILENO, "Unsetenv failed\n", 17);
+	return (count);
 }
-
-/**
- * _malloc - handling malloc and freeing exit if malloc failed.
- * @args: parameter of type para
- * @size: the size to be maloced
- * Return: the buffer.
- */
-char *_malloc(para *args, int size)
-{
-	char *buff = malloc(size);
-
-	if (!buff)
-		free_exit(args);
-	return (buff);
-}
-

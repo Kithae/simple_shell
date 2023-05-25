@@ -1,196 +1,162 @@
 #include "main.h"
 
-#define D(i) (*d)[i]
 /**
-* input - determine if we start new line in the shell with an arrow.
-* @args: parameter of type para
-* @arrow: 1 if stdin
-* @semi:  0 or 1
-* Return: 0, 1
-*/
-int input(para *args, int arrow, int *semi)
+ * _atoi - Convert a string to an integer.
+ * @s: The string to convert
+ *
+ * Return: An integer
+ */
+int _atoi(const char *s)
 {
-	ssize_t read;
+	int c = 0;
+	unsigned int ni = 0;
+	int min = 1;
+	int isi = 0;
 
-	read = _getline(args);
-	if (read == -1)
+	while (s[c])
 	{
-		if (isatty(STDIN_FILENO) && arrow && !args->file)
-			write(1, "\n", 1);
-		close(args->file);
-		if (args->line)
-			free(args->line);
-		if (args->path)
-			free(args->path);
-		if (args->pwd)
-			free(*(args->pwd));
-		if (args->old_pwd)
-			free(args->old_pwd);
-		exit(args->status);
+		if (s[c] == 45)
+		{
+			min *= -1;
+		}
+
+		while (s[c] >= 48 && s[c] <= 57)
+		{
+			isi = 1;
+			ni = (ni * 10) + (s[c] - '0');
+			c++;
+		}
+
+		if (isi == 1)
+		{
+			break;
+		}
+
+		c++;
 	}
-	if (*semi)
-		args->count--;
-	if (args->line[read - 1] == '\n')
+
+	ni *= min;
+	return (ni);
+}
+
+/**
+ * _getline - Custom getline function
+ * @buffer: buffer to store the input
+ * @bufsize: Stores the size of the buffer
+ * @stream: input stream
+ * Return: count of chars inputed
+*/
+size_t _getline(char **buffer, size_t *bufsize, FILE *stream)
+{
+	size_t count;
+	char *c;
+
+	c = malloc(*bufsize * sizeof(buffer));
+
+	if (c == NULL)
 	{
-		args->line[read - 1] = '\0';
-	}
-	if (args->line[read - 1] == ';')
-	{
-		args->line[read - 1] = '\0';
-		*semi = 1;
 		return (0);
 	}
-	*semi = 0;
-	return (1);
-}
 
-/**
- * _getline - read an entire line from a stream.
- * @args: parameter of type para.
- * Return: no of chars read from the stream.
-*/
-ssize_t _getline(para *args)
-{
-	size_t i = 0;
-	ssize_t read_line;
-	char *buffer;
-	int buffer_size = 10240;
-
-	if (&(args->line) == NULL)
-		return (-1);
-	buffer = _malloc(args, buffer_size + 1);
-	if (args->line)
+	for (count = 0; c[count] != '\n'; count++)
 	{
-		free(args->line);
-		args->line = NULL;
-	}
-	while ((read_line = read(args->file, buffer + i, 1)) > 0)
-	{
-		i++;
-		buffer = handle_realloc(args, buffer, &buffer_size, 2048, i);
-		if (buffer[i - 1] == '\n' || buffer[i - 1] == ';')
-			break;
-	}
-	if (read_line < 0 || (!read_line && !i))
-	{
-		free(buffer);
-		return (-1);
-	}
-	if (read_line != 8)
-		buffer[i] = '\0';
-	args->line = buffer;
-	return (i);
-}
-
-/**
- * handle_input - determine if line contain $ or # and act accordingly.
- * @args: parameter of type para..
- *
- * Return: 1 if the string is empty
-*/
-int handle_input(para *args)
-{
-char *buffer, *dollar, *start, *hash = _strchr(args->line, '#');
-int buffer_size = 10240;
-
-if (hash && ((hash != args->line && *(hash - 1) == ' ') || hash == args->line))
-	*hash = '\0';
-buffer = _malloc(args, buffer_size);
-dollar = _strchr(args->line, '$');
-start = args->line;
-buffer[0] = '\0';
-while (dollar)
-{
-	buffer = handle_realloc(args, buffer, &buffer_size,
-	1024, _strlen(buffer) + dollar - start);
-	_strncat(buffer, start, dollar - start);
-	handle_dollar(buffer, &dollar, args);
-	start = dollar;
-	dollar = _strchr(start, '$');
-}
-buffer = handle_realloc(args, buffer, &buffer_size,
-128, _strlen(buffer) + _strlen(start));
-_strcat(buffer, start);
-space(&buffer, args);
-handle_dots(&buffer, args);
-free(args->line);
-args->line = buffer;
-return (buffer[0] == '\0');
-}
-
-/**
- * handle_dollar - handle input containing $ sign.
- * @buffer: input containing $.
- * @d: input starting from $ sign.
- * @args: parameter of type para.
-*/
-void handle_dollar(char *buffer, char **d, para *args)
-{
-	char num[10], *env;
-	int i = 0;
-
-	(*d)++;
-	if (D(0) == '$' || D(0) == '?')
-	{
-		if (D(0) == '$')
-			tostring(num, args->pid);
-		else
-			tostring(num, args->status);
-		_strcat(buffer, num);
-		(*d)++;
-	}
-	else
-	{
-		while (D(i) && D(i) != ' ' && D(i) != '#' && D(i) != '$' && D(i) != '/')
-			i++;
-		if (!i)
-			_strcat(buffer, "$");
-		else
+		c[count] = getc(stream);
+		if (count > *bufsize)
 		{
-			env = _get_env(args->envp, *d, i);
-			if (env)
-				_strcat(buffer, env);
-			*d += i;
+			*bufsize = count;
+			c = realloc(c, *bufsize);
+		}
+		*buffer = c;
+	}
+	*buffer[count] = '\0';
+	free(c);
+
+	return (count);
+}
+
+/**
+ * get_path - function that gets the path to an
+ * executeable program in the bin diretory by
+ * concartinating cmd to /bin/
+ * @cmd: the command to be executed
+ * Return: pointer to the path on success, NULL
+ * on failure
+*/
+char *get_path(char *cmd)
+{
+	char *path = NULL;
+	char *prefix = "/bin/";
+	int i, j = 0;
+
+	if (access(cmd, X_OK | F_OK) == 0)
+	{
+		return (cmd);
+	}
+	if (cmd != NULL)
+	{
+		int size = _strlen(cmd) + _strlen(prefix) + 1;
+
+		path = malloc(sizeof(char) * size);
+		if (path != NULL)
+		{
+			for (i = 0; i < size - 1; i++)
+			{
+				if (i < _strlen(prefix))
+				{
+					path[i] = prefix[i];
+				}
+				else
+				{
+					path[i] = cmd[j];
+					j++;
+				}
+			}
+			free(cmd);
+			path[i] = '\0';
+			return (path);
 		}
 	}
+	return (path);
 }
 
 /**
- * space - handle extra spaces in the input.
- * @line: input
- * @args: parameter of type para.
+* _strcpy - copy the string pointed to by src to dest
+* @dest: char to check
+* @src: char to check
+* Return: 0 is success
 */
-void space(char **line, para *args)
+char *_strcpy(char *dest, const char *src)
 {
-	int i = 0, j = 0;
-	char *buffer = malloc(_strlen(*line) + 1);
+	int a;
 
-	if (buffer == NULL)
+	for (a = 0; src[a] != '\0'; a++)
+		dest[a] = src[a];
+	dest[a] = '\0';
+
+	return (dest);
+}
+
+/**
+ * _strcat - concat 2 string
+ * @dest:char
+ * @src:char
+ * Return:char
+ */
+char *_strcat(char *dest, const char *src)
+{
+	char *s = dest;
+
+	while (*dest != '\0')
 	{
-		free(*line);
-		free_exit(args);
+		dest++;
 	}
-	while ((*line)[i] && (*line)[i] == ' ')
-		i++;
-	while ((*line)[i])
+
+	while (*src != '\0')
 	{
-		if ((*line)[i] == ' ')
-		{
-			buffer[j] = ' ';
-			j++;
-			while ((*line)[i] == ' ')
-				i++;
-		}
-		else
-		{
-			buffer[j] = (*line)[i];
-			i++;
-			j++;
-		}
+		*dest = *src;
+		dest++;
+		src++;
 	}
-	if (j && buffer[j - 1] == ' ')
-		j--;
-	buffer[j] = '\0';
-	free(*line);
-	*line = buffer;
+	*dest = '\0';
+	return (s);
 }

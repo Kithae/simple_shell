@@ -1,116 +1,115 @@
 #include "main.h"
 
 /**
- * _printf - print.
- * @format: the format
- *
- * Return: the number of chars
- */
-
-int _printf(const char *format, ...)
-{
-	unsigned int i, len = 0;
-	va_list args;
-
-	if (format == NULL)
-		return (-1);
-	va_start(args, format);
-	for (i = 0; format[i]; i++)
-	{
-		if (format[i] != '%')
-		{
-			len += p_char(format[i]);
-			continue;
-		}
-		if ((int)i++ == _strlen((char *)format) - 1)
-			return (-1);
-		len += specifier(format[i], args);
-	}
-	va_end(args);
-	return (len);
-}
-
-/**
- * handle_dots - handle the dots
- * @line: input
- * @args: parameter of type para
- */
-
-void handle_dots(char **line, para *args)
-{
-	int i = 0, len;
-	char *line_c = *line, *buffer;
-
-	if (line_c[0] == '.')
-	{
-		buffer = malloc2(*line, args, 512);
-		buffer[0] = '\0';
-		_strcat(buffer, &((*(args->pwd))[4]));
-		len = _strlen(buffer);
-		while (line_c[i] && line_c[i] != ' ')
-		{
-			if (line_c[i] == '.' && line_c[i + 1] == '.')
-			{
-				while (buffer[len - 1] != '/')
-					buffer[(len--) - 1] = '\0';
-				buffer[(len--) - 1] = '\0';
-				i++;
-			}
-			else if (line_c[i] != '/' && line_c[i] != '.')
-			{
-				buffer[len++] = '/';
-				while (line_c[i] && line_c[i] != '/' && line_c[i] != ' ')
-					buffer[len++] = line_c[i++];
-				i--;
-			}
-			i++;
-		}
-		buffer[len] = '\0';
-		if (access(buffer, X_OK) == 0)
-		{
-			_strcat(buffer, &line_c[i]);
-			free(*line);
-			*line = buffer;
-		}
-	}
-}
-
-/**
- * malloc2 - handle malloc2
- * @line: input
- * @args: parameter of type para
- * @size: the size
- *
- * Return: the buffer
- */
-
-char *malloc2(char *line, para *args, int size)
-{
-	char *buffer = malloc(size);
-
-	if (!buffer)
-	{
-		free(line);
-		free_exit(args);
-	}
-	return (buffer);
-}
-
-/**
-* token - function to return the splitted number of token
-* @line: the string to be splitted
-* @delim: the delim used to split the string
-* Return:number of token splitted
+ * main - main program entry
+ * Return: 0 on success, -1 on failure
 */
-int token(char *line, char *delim)
+int main(void)
 {
-	int n_token = 0;
-	char *str_token = _strtok(line, delim);
+	int status = 0;
 
-	while (str_token)
+	atexit(clear_env);
+	while (status == 0)
+		status = prompt();
+
+	return (0);
+}
+
+/**
+ * chgdir - Function that changes the directory
+ * of the calling process
+ * @path: path to change to
+*/
+void chgdir(const char *path)
+{
+	char tmp[300];/* , *newpath; */
+
+	getcwd(tmp, 300);
+	printf("got here\n");
+	if (path != NULL)
 	{
-		str_token = _strtok(NULL, delim);
-		n_token++;
+		if (access(path, F_OK) == 0)
+		{
+			chdir(path);
+			_setenv("OLDWD", tmp);
+			_setenv("PWD", path);
+		}
 	}
-	return (n_token);
+}
+
+/**
+ * exe_bin - function that execute a binary program
+ * @args: arguments to be passed to the program
+ * Return: 0 on sucess, -1 on failure
+*/
+int exe_bin(char **args)
+{
+	if (access(args[0], X_OK | F_OK) == 0)
+	{
+		pid_t child = fork();
+
+		if (child == -1)
+			perror("./hsh");
+		if (child != 0)
+		{
+			wait(NULL);
+		} else
+		{
+			int val = execve(args[0], args, environ);
+
+			if (val == -1)
+				perror("./hsh");
+			return (-1);
+		}
+	}
+
+	return (0);
+}
+
+/**
+ * freeWords - Function that dynamicaly frees an array of strings
+ * @words: array of strings to be freed
+ * @wordCount: number of words in the array
+ * Return: 0 on success, -1 on failure
+*/
+int freeWords(char **words, int wordCount)
+{
+	int i;
+
+	if (words != NULL && wordCount > 0)
+	{
+		for (i = 0; i <= wordCount; i++)
+		{
+			free((words)[i]);
+		}
+		free(words);
+		return (0);
+	}
+	return (-1);
+}
+
+/**
+ * _getenv - Function that returns an env value
+ * @name: env value to be returned
+ * Return: env value of name
+*/
+char *_getenv(const char *name)
+{
+	char *env, *delim = "=", *tmp;
+	int i = 0;
+
+	while (environ[i])
+	{
+		env = _strdup(environ[i]);
+		tmp = _strtok(env, delim);
+		if (strcmp(tmp, name) == 0)
+		{
+			tmp = _strtok(NULL, delim);
+			free(env);
+			return (tmp);
+		}
+		i++;
+		free(env);
+	}
+	return (NULL);
 }
