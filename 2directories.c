@@ -1,9 +1,9 @@
 #include "main.h"
 
 /**
- * c_dir - a function for changing directory
- * @ags: info parameter
- * Return: 0, else 1
+ * c_dir - a function for changing directory.
+ * @ags: info parameter.
+ * Return: 0, else 1.
  */
 int c_dir(info *ags)
 {
@@ -45,8 +45,8 @@ int c_dir(info *ags)
 }
 
 /**
- * new_pwd - a function for changing the working directory
- * @ags: info parameter
+ * new_pwd - a function for changing the working directory.
+ * @ags: info parameter.
  */
 void new_pwd(info *ags)
 {
@@ -62,9 +62,9 @@ void new_pwd(info *ags)
 }
 
 /**
- * handle_PWD - a function that gets a directory from the environment
- * @ags: info parameter
- * Return: a pointer
+ * handle_PWD - a function that gets a directory from the environment.
+ * @ags: info parameter.
+ * Return: a pointer.
  */
 char **handle_PWD(info *ags)
 {
@@ -84,8 +84,8 @@ char **handle_PWD(info *ags)
 }
 
 /**
- * free_quit - a function that frees arguments b4 the program exits
- * @ags: info parameter
+ * free_quit - a function that frees arguments b4 the program exits.
+ * @ags: info parameter.
  */
 void free_quit(info *ags)
 {
@@ -102,8 +102,8 @@ void free_quit(info *ags)
 
 /**
  * _malloc - a function that handles malloc.
- * @ags: info parameter
- * @size: a malloced size
+ * @ags: info parameter.
+ * @size: a malloced size.
  * Return: a buffer.
  */
 char *_malloc(info *ags, int size)

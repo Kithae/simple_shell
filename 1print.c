@@ -1,10 +1,10 @@
 #include "main.h"
 
 /**
- * _print - a function for printing
- * @fmt: the format
+ * _print - a function for printing.
+ * @fmt: the format.
  *
- * Return: total chars
+ * Return: total chars.
  */
 
 int _print(const char *fmt, ...)
@@ -31,9 +31,9 @@ int _print(const char *fmt, ...)
 }
 
 /**
- * handle_dots - a function for handling dots
- * @line: input
- * @ags: info parameter
+ * handle_dots - a function for handling dots.
+ * @line: input.
+ * @ags: info parameter.
  */
 
 void handle_dots(char **line, info *ags)
@@ -76,11 +76,11 @@ void handle_dots(char **line, info *ags)
 }
 
 /**
- * mal2 - a function for handling malloc2
- * @line: input
- * @ags: info parameter
- * @size: a size
- * * Return: a buffer
+ * mal2 - a function for handling malloc2.
+ * @line: input.
+ * @ags: info parameter.
+ * @size: a size.
+ * * Return: a buffer.
  */
 
 char *mal2(char *line, info *ags, int size)
@@ -96,10 +96,10 @@ char *mal2(char *line, info *ags, int size)
 }
 
 /**
- * tkn - a function for returning total tokens
- * @line: input
-* @dlim: a delimiter
-* Return: total split tokens
+ * tkn - a function for returning total tokens.
+ * @line: input.
+* @dlim: a delimiter.
+* Return: total split tokens.
 */
 int tkn(char *line, char *dlim)
 {

@@ -12,19 +12,19 @@
 #define STRING ((uzi) ? uzi : "(null)")
 
 /**
- * struct info - a data structure
+ * struct info - a data structure.
  * @envp: environmental variables array.
- * @pwd: a directory
+ * @pwd: a directory.
  * @line: input.
- * @path: a path
- * @prev_pwd: the previous working directory
- * @n_tkn: token number
- * @n_path: total tokens in a path
- * @status: a command status
- * @file: a stream
- * @count: operation count
- * @pid: shell identity
- * @s_name: a name
+ * @path: a path.
+ * @prev_pwd: the previous working directory.
+ * @n_tkn: token number.
+ * @n_path: total tokens in a path.
+ * @status: a command status.
+ * @file: a stream.
+ * @count: operation count.
+ * @pid: shell identity.
+ * @s_name: a name.
  */
 typedef struct info
 {
